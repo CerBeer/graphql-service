@@ -1,10 +1,10 @@
-import { GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLInputObjectType } from "graphql";
 import { UUIDType } from "./uuid.js";
 import { Context } from "./context.js";
 import { ProfileType } from "./profile.js";
 import { PostType } from "./post.js";
 
-export const UserType = new GraphQLObjectType<User, Context>({
+export const UserType = new GraphQLObjectType<UserQuery, Context>({
   name: 'User',
   fields: () => ({
     id: { type: UUIDType },
@@ -62,8 +62,19 @@ export const UserType = new GraphQLObjectType<User, Context>({
   }),
 });
 
+export const UserCreateType = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat }
+  },
+});
+
 export type User = {
-  id: string,
   name: string,
   balance: number,
 };
+
+export type UserQuery = { id: string } & User;
+
+export type UserCreate = { dto: User }
