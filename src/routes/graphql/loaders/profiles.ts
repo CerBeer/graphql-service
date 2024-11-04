@@ -3,7 +3,7 @@ import { Context } from '../types/context.js';
 
 import DataLoader from 'dataloader';
 
-export const profileLoader = (
+export const profilesLoader = (
   info: GraphQLResolveInfo,
   { prisma, dataLoaders }: Context,
 ) => {

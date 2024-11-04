@@ -2,7 +2,7 @@ import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLObjectType }
 import { UUIDType } from "./uuid.js";
 import { MemberType, MemberTypeId } from "./member.js";
 import { Context } from "./context.js";
-import { memberLoader } from "../loaders/member.js";
+import { membersLoader } from "../loaders/members.js";
 
 export const ProfileType = new GraphQLObjectType<ProfileQuery, Context>({
   name: 'Profile',
@@ -16,7 +16,7 @@ export const ProfileType = new GraphQLObjectType<ProfileQuery, Context>({
     memberType: {
       type: MemberType,
       resolve: ({ memberTypeId }, _args, context, info) => {
-        const dataLoader = memberLoader(info, context);
+        const dataLoader = membersLoader(info, context);
         return dataLoader.load(memberTypeId);
       },
     },

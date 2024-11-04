@@ -3,6 +3,8 @@ import { UUIDType } from "./uuid.js";
 import { Context } from "./context.js";
 import { ProfileType } from "./profile.js";
 import { PostType } from "./post.js";
+import { profilesLoader } from "../loaders/profiles.js";
+import { postsLoader } from "../loaders/posts.js";
 
 export const UserType = new GraphQLObjectType<UserQuery, Context>({
   name: 'User',
@@ -13,19 +15,17 @@ export const UserType = new GraphQLObjectType<UserQuery, Context>({
 
     profile: {
       type: ProfileType,
-      resolve: async ({ id }, _args, context) => {
-        return await context.prisma.profile.findUnique({
-          where: { userId: id },
-        });
+      resolve: async ({ id }, _args, context, info) => {
+        const dataLoader = profilesLoader(info, context);
+        return dataLoader.load(id);
       },
     },
 
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async ({ id }, _args, context) => {
-        return context.prisma.post.findMany({
-          where: { authorId: id },
-        });
+      resolve: async ({ id }, _args, context, info) => {
+        const dataLoader = postsLoader(info, context);
+        return dataLoader.load(id);
       },
     },
 
