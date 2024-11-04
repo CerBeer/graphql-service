@@ -20,7 +20,7 @@ export const PostCreateType = new GraphQLInputObjectType({
   },
 });
 
-type Post = {
+export type Post = {
   title: string,
   content: string,
   authorId: string,

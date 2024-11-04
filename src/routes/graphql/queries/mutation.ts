@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { GraphQLNonNull, GraphQLObjectType } from "graphql";
-import { Context, RootObject } from "../types/context.js";
+import { GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { Context, ID, RootObject } from "../types/context.js";
 import { UserCreate, UserCreateType, UserType } from "../types/user.js";
 import { PostCreateType, PostCreate, PostType } from "../types/post.js";
 import { ProfileCreate, ProfileCreateType, ProfileType } from "../types/profile.js";
+import { UUIDType } from "../types/uuid.js";
 
 export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
   name: 'Mutation',
   fields: {
     createUser: {
-      type: UserType,
+      type: new GraphQLNonNull(UserType),
       args: {
         dto: { type: new GraphQLNonNull(UserCreateType) },
       },
@@ -19,9 +20,24 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
         });
       },
     },
+    
+    deleteUser: {
+      type: GraphQLString,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_obg, { id }: ID, context) => {
+        await context.prisma.user.delete({
+          where: {
+            id: id,
+          },
+        });
+        return 'User was deleted';
+      },
+    },
 
     createPost: {
-      type: PostType,
+      type: new GraphQLNonNull(PostType),
       args: {
         dto: { type: new GraphQLNonNull(PostCreateType) },
       },
@@ -32,8 +48,23 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
       },
     },
 
+    deletePost: {
+      type: GraphQLString,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_obg, { id }: ID, context) => {
+        await context.prisma.post.delete({
+          where: {
+            id: id,
+          },
+        });
+        return 'Post was deleted';
+      },
+    },
+
     createProfile: {
-      type: ProfileType,
+      type: new GraphQLNonNull(ProfileType),
       args: {
         dto: { type: new GraphQLNonNull(ProfileCreateType) },
       },
@@ -41,6 +72,21 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
         return context.prisma.profile.create({
           data: dto,
         });
+      },
+    },
+
+    deleteProfile: {
+      type: GraphQLString,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_obg, { id }: ID, context) => {
+        await context.prisma.profile.delete({
+          where: {
+            id: id,
+          },
+        });
+        return 'Profile was deleted';
       },
     },
   }
