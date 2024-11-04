@@ -5,6 +5,8 @@ import { ProfileType } from "./profile.js";
 import { PostType } from "./post.js";
 import { profilesLoader } from "../loaders/profiles.js";
 import { postsLoader } from "../loaders/posts.js";
+import { userSubscribedToLoader } from "../loaders/userSubscribedTo.js";
+import { subscribedToUserLoader } from "../loaders/subscribedToUser.js";
 
 export const UserType = new GraphQLObjectType<UserQuery, Context>({
   name: 'User',
@@ -31,31 +33,17 @@ export const UserType = new GraphQLObjectType<UserQuery, Context>({
 
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: async ({ id }, _args, context) => {
-        return context.prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: id,
-              },
-            },
-          },
-        });
+      resolve: async ({ id }, _args, context, info) => {
+        const dataLoader = userSubscribedToLoader(info, context);
+        return dataLoader.load(id);
       },
     },
 
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: async ({ id }, _args, context) => {
-        return context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: id,
-              },
-            },
-          },
-        });
+      resolve: async ({ id }, _args, context, info) => {
+        const dataLoader = subscribedToUserLoader(info, context);
+        return dataLoader.load(id);
       },
     },
   }),
