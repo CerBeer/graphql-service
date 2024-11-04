@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { Context, ID, RootObject } from "../types/context.js";
-import { UserChange, UserChangeType, UserCreate, UserCreateType, UserType } from "../types/user.js";
+import { Subscribe, UserChange, UserChangeType, UserCreate, UserCreateType, UserType } from "../types/user.js";
 import { PostCreateType, PostCreate, PostType, PostChange, PostChangeType } from "../types/post.js";
 import { ProfileChange, ProfileChangeType, ProfileCreate, ProfileCreateType, ProfileType } from "../types/profile.js";
 import { UUIDType } from "../types/uuid.js";
@@ -41,12 +41,12 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (_obg, { id }: ID, context) => {
-        await context.prisma.user.delete({
+        const result = await context.prisma.user.delete({
           where: {
             id: id,
           },
         });
-        return 'User was deleted';
+        return result.id;
       },
     },
 
@@ -82,12 +82,12 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (_obg, { id }: ID, context) => {
-        await context.prisma.post.delete({
+        const result = await context.prisma.post.delete({
           where: {
             id: id,
           },
         });
-        return 'Post was deleted';
+        return result.id;
       },
     },
 
@@ -123,13 +123,55 @@ export const rootMutationType = new GraphQLObjectType<RootObject, Context>({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (_obg, { id }: ID, context) => {
-        await context.prisma.profile.delete({
+        const result = await context.prisma.profile.delete({
           where: {
             id: id,
           },
         });
-        return 'Profile was deleted';
+        return result.id;
       },
+    },
+
+    subscribeTo: {
+      type: GraphQLString,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_obj, { userId, authorId }: Subscribe, context) => {
+        const result = await context.prisma.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            userSubscribedTo: {
+              create: {
+                authorId: authorId,
+              },
+            },
+          },
+        });
+        return result.id;
+      },
+    },
+
+    unsubscribeFrom: {
+      type: GraphQLString,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_obj, { userId, authorId }: Subscribe, context) => {
+        const result = await context.prisma.subscribersOnAuthors.delete({
+          where: {
+            subscriberId_authorId: {
+              subscriberId: userId,
+              authorId: authorId,
+            },
+          },
+        });
+        return result.authorId;
+      }
     },
   }
 });
