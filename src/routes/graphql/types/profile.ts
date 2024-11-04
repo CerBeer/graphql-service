@@ -25,12 +25,22 @@ export const ProfileType = new GraphQLObjectType<ProfileQuery, Context>({
   }),
 });
 
+
 export const ProfileCreateType = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: {
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
+    memberTypeId: { type: MemberTypeId },
+  },
+});
+
+export const ProfileChangeType = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
     memberTypeId: { type: MemberTypeId },
   },
 });
@@ -45,3 +55,5 @@ export type Profile = {
 export type ProfileQuery = { id: string } & Profile;
 
 export type ProfileCreate = { dto: Profile }
+
+export type ProfileChange = { dto: Profile }
